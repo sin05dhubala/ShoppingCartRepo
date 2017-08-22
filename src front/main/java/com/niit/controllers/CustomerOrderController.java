@@ -7,18 +7,25 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.niit.model.Addproduct;
 import com.niit.model.Cart;
+import com.niit.model.CartItem;
 import com.niit.model.Customer;
 import com.niit.model.CustomerOrder;
 import com.niit.model.ShippingAddress;
 import com.niit.Service.CartItemService;
 import com.niit.Service.CustomerOrderService;
+import com.niit.Service.ProductService;
 @Controller
 public class CustomerOrderController {
 	@Autowired
 	private CustomerOrderService customerOrderService;
 	@Autowired
 	private CartItemService cartItemService;
+	
+	@Autowired
+	private ProductService productService;
+	
 	@RequestMapping("/cart/shippingaddressform/{cartId}")
 	public String getShippingAddress(@PathVariable int cartId,Model model){
 		Cart cart=cartItemService.getCart(cartId);
@@ -40,6 +47,12 @@ public String createOrder(@PathVariable int cartId,@ModelAttribute ShippingAddre
 }
 	@RequestMapping("/cart/confirm/{id}")
 public String confirm(@ModelAttribute CustomerOrder order,@PathVariable int id){
+		System.out.println(id);
+		CartItem cart=cartItemService.getCartItemIDByCartID(id);
+		Addproduct product=cart.getProduct();
+		int currentQuantity=product.getQuantity();
+		product.setQuantity(currentQuantity-cart.getQuantity());
+		productService.updateProduct(product);
 	cartItemService.removeAllCartItems(id);
 	return "thanks";
 }
